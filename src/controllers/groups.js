@@ -81,11 +81,19 @@ export const editGroup = async (token, { name, groupId }) => {
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
     const allGroups = JSON.parse(localStorage.getItem("groups")) || [];
+    const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
     const groupIndex = allGroups.findIndex((group) => group.id === groupId);
+    const groupById = allGroups.find((group) => group.id === groupId);
     if (name) {
       allGroups[groupIndex].name = name;
+      const groupWithTodos = { ...groupById };
+      groupWithTodos.todos = [];
+      groupById.todos.forEach((todoId) => {
+        const filter = allTodos.find((todo) => todo.id === todoId);
+        groupWithTodos.todos.push(filter);
+      });
       localStorage.setItem("groups", JSON.stringify(allGroups));
-      return { group: allGroups[groupIndex], succes: true };
+      return { group: groupWithTodos, succes: true };
     }
   } else {
     throw Error("Not authorized");

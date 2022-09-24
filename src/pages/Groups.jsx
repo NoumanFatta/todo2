@@ -60,7 +60,8 @@ const Groups = () => {
 
   const handleEditSubmit = (event) => {
     event.preventDefault();
-    editGroup(token, { ...openedGroup }).then((response) => {
+    editGroup(token, { ...openedGroup })
+    .then((response) => {
       if (response.succes) {
         dispatch(updateGroup(response));
       }
