@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   Grid,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
@@ -20,11 +21,13 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import cookie from "react-cookies";
 import { useDispatch, useSelector } from "react-redux";
-import { createGroup, getAllGroups } from "../controllers/groups";
+import { createGroup, deleteGroup, getAllGroups } from "../controllers/groups";
 import {
   createGroupReducer,
+  deleteGroupReducer,
   getGroupsReducer,
 } from "../store/reducers/groups-slice";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
 
 const Groups = () => {
@@ -46,6 +49,15 @@ const Groups = () => {
       name: data.get("name"),
     }).then((groups) => dispatch(createGroupReducer(groups)));
     setOpen(false);
+  };
+  const delteHandler = (event, id) => {
+    event.stopPropagation();
+    deleteGroup(token, id)
+    .then((respone) => {
+      if (respone.success) {
+        dispatch(deleteGroupReducer(respone));
+      }
+    });
   };
   return (
     <Card sx={{ padding: 5 }}>
@@ -74,7 +86,7 @@ const Groups = () => {
           </Button>
         </Grid>
       </Grid>
-      <Grid className="active-todo-list" container spacing={2}>
+      <Grid container spacing={2}>
         {isLoading ? (
           <Grid item xs={12}>
             <Typography variant="h5">Loading..</Typography>
@@ -83,7 +95,16 @@ const Groups = () => {
           groups.map((group) => (
             <Grid key={group.id} item xs={12} sm={6} md={6} lg={6}>
               <Accordion>
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <AccordionSummary
+                  className="accordian-relative"
+                  expandIcon={<ExpandMoreIcon />}
+                >
+                  <IconButton
+                    className="delete-icon groups"
+                    onClick={(e) => delteHandler(e, group.id)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
                   <Typography>{group.name}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -92,7 +113,9 @@ const Groups = () => {
                       group.todos.map((todo) => (
                         <ListItem key={todo.id} disablePadding>
                           <ListItemButton
-                            disabled={todo.status === "completed" ? true : false}
+                            disabled={
+                              todo.status === "completed" ? true : false
+                            }
                           >
                             <ListItemIcon>
                               <LinkIcon />

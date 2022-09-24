@@ -86,6 +86,13 @@ const Todos = (props) => {
       dispatch(getActiveTodosReducer(response.todos));
     });
   };
+  const disablePastDate = () => {
+    const today = new Date();
+    const dd = String(today.getDate() + 1).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return yyyy + "-" + mm + "-" + dd;
+  };
 
   return (
     <Card sx={{ padding: 5 }}>
@@ -186,6 +193,30 @@ const Todos = (props) => {
               name="description"
               label="description"
             />
+            <div
+              className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-wb57ya-MuiFormControl-root-MuiTextField-root"
+              min="2022-09-25"
+            >
+              <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-md26zr-MuiInputBase-root-MuiOutlinedInput-root">
+                <input
+                  aria-invalid="false"
+                  id="date"
+                  name="due"
+                  required=""
+                  type="date"
+                  min={disablePastDate()}
+                  className="MuiInputBase-input MuiOutlinedInput-input css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input"
+                />
+                <fieldset
+                  aria-hidden="true"
+                  className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
+                >
+                  <legend className="css-ihdtdm">
+                    <span className="notranslate"></span>
+                  </legend>
+                </fieldset>
+              </div>
+            </div>
             <FormControl fullWidth>
               <InputLabel>Select Group</InputLabel>
               <Select name="group" defaultValue="" label="Select group">

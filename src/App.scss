@@ -19,3 +19,14 @@ a {
     color: white;
   }
 }
+.accordian-relative {
+  .MuiAccordionSummary-content {
+    align-items: center !important;
+    position: relative !important;
+    .delete-icon.groups {
+      position: absolute;
+      right: 0px;
+      color: red;
+    }
+  }
+}
