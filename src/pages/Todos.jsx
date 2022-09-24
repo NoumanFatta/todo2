@@ -90,8 +90,8 @@ const Todos = (props) => {
         dispatch(
           showNotification({
             status: "success",
-            title: 'Successfull',
-            message: 'Todo successfully created',
+            title: "Successfull",
+            message: "Todo successfully created",
           })
         );
         setOpen(false);
@@ -173,32 +173,31 @@ const Todos = (props) => {
             {status} Todos
           </Typography>
         </Grid>
-        {status === "active" && (
-          <Grid item xs={12} md={5}>
-            <Grid container alignItems="center">
-              <Grid item xs={12} sm={6} md={6}>
-                <Typography textTransform="capitalize" variant="h6">
-                  Sort By Due Date:
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={6} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Select Order</InputLabel>
-                  <Select
-                    onChange={(e) => {
-                      localStorage.setItem("order", e.target.value);
-                      setOrder(e.target.value);
-                    }}
-                    value={order}
-                  >
-                    <MenuItem value="ascending">Ascending</MenuItem>
-                    <MenuItem value="descending">Descending</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+
+        <Grid item xs={12} md={5}>
+          <Grid container alignItems="center">
+            <Grid item xs={12} sm={6} md={6}>
+              <Typography textTransform="capitalize" variant="h6">
+                Sort By Due Date:
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={6} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Select Order</InputLabel>
+                <Select
+                  onChange={(e) => {
+                    localStorage.setItem("order", e.target.value);
+                    setOrder(e.target.value);
+                  }}
+                  value={order}
+                >
+                  <MenuItem value="ascending">Ascending</MenuItem>
+                  <MenuItem value="descending">Descending</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
-        )}
+        </Grid>
         {status === "active" && (
           <Grid item xs={12} md={3}>
             <Box
@@ -326,30 +325,20 @@ const Todos = (props) => {
               name="description"
               label="description"
             />
-            <div
-              className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-wb57ya-MuiFormControl-root-MuiTextField-root"
-              min="2022-09-25"
-            >
-              <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-md26zr-MuiInputBase-root-MuiOutlinedInput-root">
-                <input
-                  aria-invalid="false"
-                  id="date"
-                  name="due-date"
-                  required={true}
-                  type="date"
-                  min={disablePastDate()}
-                  className="MuiInputBase-input MuiOutlinedInput-input css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input"
-                />
-                <fieldset
-                  aria-hidden="true"
-                  className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
-                >
-                  <legend className="css-ihdtdm">
-                    <span className="notranslate"></span>
-                  </legend>
-                </fieldset>
-              </div>
-            </div>
+
+            <TextField
+              margin="normal"
+              type="date"
+              required
+              fullWidth
+              name="due-date"
+              ref={(node) => {
+                if (node) {
+                  const input = node.querySelector("input");
+                  input.setAttribute("min", disablePastDate());
+                }
+              }}
+            />
             <FormControl fullWidth>
               <InputLabel>Select Group</InputLabel>
               <Select

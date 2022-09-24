@@ -67,8 +67,8 @@ const EditTodo = () => {
           dispatch(
             showNotification({
               status: "success",
-              title: 'Successfull',
-              message: 'Todo has been updated',
+              title: "Successfull",
+              message: "Todo has been updated",
             })
           );
         }
@@ -122,32 +122,20 @@ const EditTodo = () => {
             name="description"
             inputRef={elementsRef.current[1]}
           />
-          <div
-            className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-wb57ya-MuiFormControl-root-MuiTextField-root"
-            min="2022-09-25"
-            style={{ marginTop: "1rem", marginBottom: "1rem" }}
-          >
-            <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-md26zr-MuiInputBase-root-MuiOutlinedInput-root">
-              <input
-                aria-invalid="false"
-                id="date"
-                name="due-date"
-                required={true}
-                type="date"
-                min={disablePastDate()}
-                ref={elementsRef.current[2]}
-                className="MuiInputBase-input MuiOutlinedInput-input css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input"
-              />
-              <fieldset
-                aria-hidden="true"
-                className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
-              >
-                <legend className="css-ihdtdm">
-                  <span className="notranslate"></span>
-                </legend>
-              </fieldset>
-            </div>
-          </div>
+          <TextField
+            margin="normal"
+            type="date"
+            required
+            inputRef={elementsRef.current[2]}
+            fullWidth
+            name="due-date"
+            ref={(node) => {
+              if (node) {
+                const input = node.querySelector("input");
+                input.setAttribute("min", disablePastDate());
+              }
+            }}
+          />
           <FormControl fullWidth>
             <InputLabel>Select Group</InputLabel>
             <Select
