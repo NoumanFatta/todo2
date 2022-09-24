@@ -87,6 +87,13 @@ const Todos = (props) => {
     })
       .then((response) => {
         dispatch(createTodoReducer(response.data));
+        dispatch(
+          showNotification({
+            status: "success",
+            title: 'Successfull',
+            message: 'Todo successfully created',
+          })
+        );
         setOpen(false);
       })
       .catch((err) => {
