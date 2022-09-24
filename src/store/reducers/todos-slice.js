@@ -22,6 +22,32 @@ const todoSlice = createSlice({
     updateTodo(state, action) {
       state.singleTodo = action.payload.todo;
     },
+    sortTodos(state, action) {
+      const { payload } = action;
+      const ascending = (a, b) => {
+        if (a.dueDate < b.dueDate) {
+          return -1;
+        }
+        if (a.dueDate > b.dueDate) {
+          return 1;
+        }
+        return 0;
+      };
+      const descending = (a, b) => {
+        if (a.dueDate > b.dueDate) {
+          return -1;
+        }
+        if (a.dueDate < b.dueDate) {
+          return 1;
+        }
+        return 0;
+      };
+      if (payload === "ascending") {
+        state.todos.sort(ascending);
+      } else {
+        state.todos.sort(descending);
+      }
+    },
   },
 });
 export default todoSlice.reducer;
@@ -30,4 +56,5 @@ export const {
   createTodoReducer,
   getTodoByIdReducer,
   updateTodo,
+  sortTodos,
 } = todoSlice.actions;

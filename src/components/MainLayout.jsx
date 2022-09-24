@@ -74,13 +74,26 @@ const MainLayout = (props) => {
               textTransform: "capitalize",
               flexGrow: 1,
               display: { xs: "none", sm: "block" },
+              fontSize: {
+                md: "1.25rem",
+                sm: "0.75rem",
+              },
             }}
           >
             {userData?.firstName} {userData?.lastName}
           </Typography>
-          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+          <Box
+            sx={{
+              display: { xs: "none", sm: "block" },
+            }}
+          >
             {navItems.map((item) => (
-              <Button key={item.title} sx={{ color: "#fff" }}>
+              <Button
+                key={item.title}
+                sx={{
+                  color: "#fff",
+                }}
+              >
                 <Link to={item.link}>{item.title}</Link>
               </Button>
             ))}

@@ -20,7 +20,7 @@ import { getAllGroups } from "../controllers/groups";
 const EditTodo = () => {
   const todoId = useParams();
   const token = cookie.load("user") ? cookie.load("user") : "";
-  const refs = ["title", "description"];
+  const refs = ["title", "description", "dueDate"];
   const elementsRef = useRef(refs.map(() => createRef()));
   const { singleTodo } = useSelector((state) => state.todo);
   const { groups } = useSelector((state) => state.group);
@@ -38,7 +38,7 @@ const EditTodo = () => {
   useEffect(() => {
     if (singleTodo.group) {
       elementsRef.current.map((ref, ind) => {
-        return ref.current.value = singleTodo[refs[ind]];
+        return (ref.current.value = singleTodo[refs[ind]]);
       });
       setGroupValue(singleTodo.group);
     }
@@ -53,6 +53,7 @@ const EditTodo = () => {
       title: data.get("title"),
       description: data.get("description"),
       group: data.get("group"),
+      dueDate: data.get("due-date"),
     }).then((response) => {
       if (response.success) {
         dispatch(updateTodo(response));
@@ -63,6 +64,13 @@ const EditTodo = () => {
   const groupHandler = (e) => {
     const { value } = e.target;
     setGroupValue(value);
+  };
+  const disablePastDate = () => {
+    const today = new Date();
+    const dd = String(today.getDate() + 1).padStart(2, "0");
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const yyyy = today.getFullYear();
+    return yyyy + "-" + mm + "-" + dd;
   };
   return (
     <Container component="main" maxWidth="xs">
@@ -92,6 +100,32 @@ const EditTodo = () => {
             name="description"
             inputRef={elementsRef.current[1]}
           />
+          <div
+            className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-wb57ya-MuiFormControl-root-MuiTextField-root"
+            min="2022-09-25"
+            style={{ marginTop: "1rem", marginBottom: "1rem" }}
+          >
+            <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl css-md26zr-MuiInputBase-root-MuiOutlinedInput-root">
+              <input
+                aria-invalid="false"
+                id="date"
+                name="due-date"
+                required={true}
+                type="date"
+                min={disablePastDate()}
+                ref={elementsRef.current[2]}
+                className="MuiInputBase-input MuiOutlinedInput-input css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input"
+              />
+              <fieldset
+                aria-hidden="true"
+                className="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
+              >
+                <legend className="css-ihdtdm">
+                  <span className="notranslate"></span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
           <FormControl fullWidth>
             <InputLabel>Select Group</InputLabel>
             <Select

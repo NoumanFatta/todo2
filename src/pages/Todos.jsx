@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   createTodoReducer,
   getActiveTodosReducer,
+  sortTodos,
 } from "../store/reducers/todos-slice";
 import { getAllGroups } from "../controllers/groups";
 import { getGroupsReducer } from "../store/reducers/groups-slice";
@@ -39,6 +40,12 @@ const Todos = (props) => {
   const token = cookie.load("user") ? cookie.load("user") : "";
   const { todos, isLoading } = useSelector((state) => state.todo);
   const { groups } = useSelector((state) => state.group);
+  const savedOrder = localStorage.getItem("order");
+  const [order, setOrder] = useState(savedOrder);
+  useEffect(() => {
+    dispatch(sortTodos(order));
+  }, [order, todos]);
+
   useEffect(() => {
     getActiveTodos(token, status).then((todos) => {
       dispatch(getActiveTodosReducer(todos));
@@ -65,6 +72,7 @@ const Todos = (props) => {
       title: data.get("title"),
       description: data.get("description"),
       group: data.get("group"),
+      dueDate: data.get("due-date"),
     })
       .then((response) => {
         dispatch(createTodoReducer(response.data));
@@ -105,29 +113,68 @@ const Todos = (props) => {
             md: "space-between",
           },
           flexDirection: {
-            sm: "column",
             md: "row",
+            sm: "row",
           },
         }}
       >
-        <Grid item>
+        <Grid item xs={12} md={3}>
           <Typography textTransform="capitalize" variant="h4">
             {status} Todos
           </Typography>
         </Grid>
         {status === "active" && (
-          <Grid item>
-            <Button
-              onClick={() => setOpen(true)}
-              disabled={groups.length ? false : true}
-              variant="contained"
+          <Grid item xs={12} md={5}>
+            <Grid container alignItems="center">
+              <Grid item xs={12} sm={6} md={6}>
+                <Typography textTransform="capitalize" variant="h6">
+                  Sort By Due Date:
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={6} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Select Order</InputLabel>
+                  <Select
+                    onChange={(e) => {
+                      localStorage.setItem("order", e.target.value);
+                      setOrder(e.target.value);
+                    }}
+                    value={order}
+                  >
+                    <MenuItem value="ascending">Ascending</MenuItem>
+                    <MenuItem value="descending">Descending</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </Grid>
+        )}
+        {status === "active" && (
+          <Grid item xs={12} md={3}>
+            <Box
+              display="flex"
+              sx={{
+                marginTop: {
+                  xs: 1,
+                },
+                justifyContent: {
+                  md: "flex-end",
+                  xs: "center",
+                },
+              }}
             >
-              Create Todo
-            </Button>
+              <Button
+                onClick={() => setOpen(true)}
+                disabled={groups.length ? false : true}
+                variant="contained"
+              >
+                Create Todo
+              </Button>
+            </Box>
           </Grid>
         )}
       </Grid>
-      <Grid className="active-todo-list" container spacing={2}>
+      <Grid className="active-todo-list" container spacing={2} rowGap={5}>
         {isLoading ? (
           <Grid item xs={12}>
             <Typography variant="h5">Loading..</Typography>
@@ -135,7 +182,16 @@ const Todos = (props) => {
         ) : todos.length !== 0 ? (
           todos.map((todo) => (
             <Grid key={todo.id} item xs={12} sm={6} md={6} lg={4}>
-              <Card sx={{ paddingX: 2, paddingY: 1, position: "relative" }}>
+              <Card
+                sx={{
+                  paddingX: 2,
+                  paddingY: 1,
+                  position: "relative",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
                 <IconButton
                   onClick={() => deleteHandler(todo.id)}
                   className="delete-icon"
@@ -144,27 +200,54 @@ const Todos = (props) => {
                   <DeleteIcon />
                 </IconButton>
                 <Typography variant="h4">{todo.title}</Typography>
-                <Typography variant="h6">{todo.description}</Typography>
-                <Typography variant="p">
-                  <strong>Group: </strong> {todo.group}
+                <Typography paddingY={2} paddingX={1}>
+                  {todo.description}
+                </Typography>
+                <Typography marginBottom={1}>
+                  <b>Group: </b> {todo.group}
+                </Typography>
+                <Typography>
+                  <b>Due Date: </b> {todo.dueDate}
                 </Typography>
                 <Box
-                  display="flex"
-                  justifyContent="space-between"
-                  paddingTop={1}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "end",
+                    flex: "1",
+                  }}
                 >
-                  <Button
-                    onClick={() => statusHandler(todo)}
-                    variant="outlined"
-                    endIcon={status === "active" ? <DoneIcon /> : <CloseIcon />}
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    sx={{
+                      flexDirection: {
+                        xs: "column",
+                        sm:'column',
+                        md:'row'
+                      },
+                      rowGap:2
+                    }}
+                    paddingTop={1}
                   >
-                    {status === "active" ? "Mark as Done" : "Mark as Active"}
-                  </Button>
-                  {status === "active" && (
-                    <Button variant="contained" onClick={() => editTodo(todo)}>
-                      Edit Todo
+                    <Button
+                      onClick={() => statusHandler(todo)}
+                      variant="outlined"
+                      endIcon={
+                        status === "active" ? <DoneIcon /> : <CloseIcon />
+                      }
+                    >
+                      {status === "active" ? "Mark as Done" : "Mark as Active"}
                     </Button>
-                  )}
+                    {status === "active" && (
+                      <Button
+                        variant="contained"
+                        onClick={() => editTodo(todo)}
+                      >
+                        Edit Todo
+                      </Button>
+                    )}
+                  </Box>
                 </Box>
               </Card>
             </Grid>
@@ -201,8 +284,8 @@ const Todos = (props) => {
                 <input
                   aria-invalid="false"
                   id="date"
-                  name="due"
-                  required=""
+                  name="due-date"
+                  required={true}
                   type="date"
                   min={disablePastDate()}
                   className="MuiInputBase-input MuiOutlinedInput-input css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input"
@@ -219,7 +302,12 @@ const Todos = (props) => {
             </div>
             <FormControl fullWidth>
               <InputLabel>Select Group</InputLabel>
-              <Select name="group" defaultValue="" label="Select group">
+              <Select
+                required
+                name="group"
+                defaultValue=""
+                label="Select group"
+              >
                 {groups.length !== 0 &&
                   groups.map((group) => (
                     <MenuItem key={group.id} value={group.id}>

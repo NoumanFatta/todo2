@@ -18,11 +18,11 @@ export const getActiveTodos = async (token, status) => {
 };
 
 export const createTodo = async (token, newTodo) => {
-  const { title, description, group } = newTodo;
+  const { title, description, group, dueDate } = newTodo;
   let success = false;
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
-    if (title && description && group) {
+    if (title && description && group && dueDate) {
       const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
       const allGroups = JSON.parse(localStorage.getItem("groups"));
       const index = allGroups.findIndex((elem) => elem.id === group);
@@ -35,6 +35,7 @@ export const createTodo = async (token, newTodo) => {
         status: "active",
         group,
         id,
+        dueDate,
         createdBy: isAuthencitaed.id,
       });
       localStorage.setItem("todos", JSON.stringify(allTodos));
@@ -64,7 +65,7 @@ export const getTodoById = async (token, todoId) => {
 };
 
 export const editTodo = async (token, todoId, newTodo) => {
-  const { title, description, group } = newTodo;
+  const { title, description, group, dueDate } = newTodo;
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
     const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
@@ -80,12 +81,17 @@ export const editTodo = async (token, todoId, newTodo) => {
     }
     const newGroupIndex = allGroups.findIndex((groups) => groups.id === group);
     allGroups[newGroupIndex].todos.push(todoId);
-    allTodos[index].title = title;
-    allTodos[index].description = description;
-    allTodos[index].group = group;
-    localStorage.setItem("todos", JSON.stringify(allTodos));
-    localStorage.setItem("groups", JSON.stringify(allGroups));
-    return { todo: allTodos[index], success: true };
+    if (title && description && group && dueDate) {
+      allTodos[index].title = title;
+      allTodos[index].description = description;
+      allTodos[index].group = group;
+      allTodos[index].dueDate = dueDate;
+      localStorage.setItem("todos", JSON.stringify(allTodos));
+      localStorage.setItem("groups", JSON.stringify(allGroups));
+      return { todo: allTodos[index], success: true };
+    } else {
+      throw Error("All Fields Are Required");
+    }
   }
 };
 

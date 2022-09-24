@@ -17,6 +17,7 @@ const authSlice = createSlice({
       state.isLoggedIn = true;
       state.user = action.payload.token;
       cookie.save("user", action.payload.token, { path: "/" });
+      localStorage.setItem("order", "ascending");
     },
     logoutUser(state) {
       state.isLoggedIn = false;
