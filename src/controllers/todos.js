@@ -98,20 +98,35 @@ export const editTodo = async (token, todoId, newTodo) => {
 export const changeStatus = async (token, todoId, status) => {
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
+    const allGroups = JSON.parse(localStorage.getItem("groups")) || [];
     const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
     const index = allTodos.findIndex((todo) => todo.id === todoId);
     allTodos[index].status = status;
     localStorage.setItem("todos", JSON.stringify(allTodos));
     if (status === "completed") {
       const response = allTodos.filter((todo) => todo.status === "active");
+      const filteredTodos = response.filter(
+        (todo) => todo.createdBy === isAuthencitaed.id
+      );
+      const todoWithGroup = filteredTodos.map((todo) => {
+        const group = allGroups.find((group) => group.id === todo.group);
+        return { ...todo, group: group.name };
+      });
       return {
-        todos: response.filter((todo) => todo.createdBy === isAuthencitaed.id),
+        todos: todoWithGroup,
         success: true,
       };
     }
     const response = allTodos.filter((todo) => todo.status === "completed");
+    const filteredTodos = response.filter(
+      (todo) => todo.createdBy === isAuthencitaed.id
+    );
+    const todoWithGroup = filteredTodos.map((todo) => {
+      const group = allGroups.find((group) => group.id === todo.group);
+      return { ...todo, group: group.name };
+    });
     return {
-      todos: response.filter((todo) => todo.createdBy === isAuthencitaed.id),
+      todos: todoWithGroup,
       success: true,
     };
   }
@@ -131,11 +146,18 @@ export const deleleTodo = async (token, todoId) => {
       allGroups[groupIndex].todos.splice(todoToBeDeleted, 1);
     }
     allTodos.splice(todoIndex, 1);
+    const filteredTodos = allTodos.filter(
+      (todo) => todo.createdBy === isAuthencitaed.id
+    );
+    const todoWithGroup = filteredTodos.map((todo) => {
+      const group = allGroups.find((group) => group.id === todo.group);
+      return { ...todo, group: group.name };
+    });
     localStorage.setItem("todos", JSON.stringify(allTodos));
     localStorage.setItem("groups", JSON.stringify(allGroups));
     return {
       groups: allGroups,
-      todos: allTodos.filter((todo) => todo.createdBy === isAuthencitaed.id),
+      todos: todoWithGroup,
     };
   }
 };

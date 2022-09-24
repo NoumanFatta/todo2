@@ -46,12 +46,14 @@ const Todos = (props) => {
 
   useEffect(() => {
     return () => {
-      dispatch(clearTodos())
+      dispatch(clearTodos());
     };
+    // eslint-disable-next-line
   }, [status]);
 
   useEffect(() => {
-    dispatch(sortTodos(order));
+    if (todos.length) dispatch(sortTodos(order));
+    // eslint-disable-next-line
   }, [order, todos]);
 
   useEffect(() => {

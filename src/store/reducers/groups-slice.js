@@ -18,7 +18,7 @@ const groupsSlice = createSlice({
     deleteGroupReducer(state, action) {
       const responeGroup = action.payload.group;
       state.groups = state.groups.filter(
-        (group) => group.id != responeGroup.id
+        (group) => group.id !== responeGroup.id
       );
     },
     updateGroup(state, action) {

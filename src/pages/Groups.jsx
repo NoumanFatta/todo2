@@ -54,6 +54,7 @@ const Groups = () => {
     return () => {
       dispatch(clearGroups());
     };
+    // eslint-disable-next-line
   }, []);
 
   const handleSubmit = (event) => {

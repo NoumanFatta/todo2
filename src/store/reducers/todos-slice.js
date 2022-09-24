@@ -25,19 +25,19 @@ const todoSlice = createSlice({
     sortTodos(state, action) {
       const { payload } = action;
       const ascending = (a, b) => {
-        if (a.dueDate < b.dueDate) {
+        if (a.dueDate > b.dueDate) {
           return -1;
         }
-        if (a.dueDate > b.dueDate) {
+        if (a.dueDate < b.dueDate) {
           return 1;
         }
         return 0;
       };
       const descending = (a, b) => {
-        if (a.dueDate > b.dueDate) {
+        if (a.dueDate < b.dueDate) {
           return -1;
         }
-        if (a.dueDate < b.dueDate) {
+        if (a.dueDate > b.dueDate) {
           return 1;
         }
         return 0;
