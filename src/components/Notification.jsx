@@ -23,7 +23,6 @@ const Notification = (props) => {
         position: "fixed",
         right: "10px",
         top: 10,
-        width: "20%",
         zIndex: 1301,
       }}
       severity={props.status}
