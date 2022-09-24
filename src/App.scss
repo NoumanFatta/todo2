@@ -1,0 +1,21 @@
+.active-todo-list {
+  .delete-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: red;
+  }
+  .view-popup {
+    .MuiPaper-root {
+      min-width: 500px;
+    }
+  }
+}
+a {
+  text-decoration: none;
+}
+.MuiButton-root {
+  a {
+    color: white;
+  }
+}
