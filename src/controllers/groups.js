@@ -1,6 +1,9 @@
 import { checkToken } from "./checkToken";
 import { v4 as uuidv4 } from "uuid";
-
+function UserException(title, message) {
+  this.message = message;
+  this.title = title;
+}
 export const getAllGroups = async (token) => {
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
@@ -47,9 +50,9 @@ export const createGroup = async (token, newGroup) => {
         return obj;
       });
       return groupsWithTodos;
+    } else {
+      throw new UserException("Missing fields", "All fields are required");
     }
-  } else {
-    return [];
   }
 };
 export const deleteGroup = async (token, groupId) => {
@@ -71,7 +74,7 @@ export const deleteGroup = async (token, groupId) => {
       localStorage.setItem("todos", JSON.stringify(allTodos));
       return { group, success: true };
     } else {
-      throw Error("Group not found");
+      throw new UserException("Not found", "Group not found");
     }
   } else {
     throw Error("Not authorized");
@@ -83,6 +86,9 @@ export const editGroup = async (token, { name, groupId }) => {
     const allGroups = JSON.parse(localStorage.getItem("groups")) || [];
     const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
     const groupIndex = allGroups.findIndex((group) => group.id === groupId);
+    if (groupIndex === -1) {
+      throw new UserException("Not found", "Group not found");
+    }
     const groupById = allGroups.find((group) => group.id === groupId);
     if (name) {
       allGroups[groupIndex].name = name;

@@ -1,6 +1,16 @@
 import { v4 as uuidv4 } from "uuid";
 import { checkToken } from "./checkToken";
-
+function UserException(title, message) {
+  this.message = message;
+  this.title = title;
+}
+const getDueDate = () => {
+  const today = new Date();
+  const dd = String(today.getDate() + 1).padStart(2, "0");
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const yyyy = today.getFullYear();
+  return yyyy + "-" + mm + "-" + dd;
+};
 export const getActiveTodos = async (token, status) => {
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
@@ -23,30 +33,37 @@ export const createTodo = async (token, newTodo) => {
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
     if (title && description && group && dueDate) {
-      const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
-      const allGroups = JSON.parse(localStorage.getItem("groups"));
-      const index = allGroups.findIndex((elem) => elem.id === group);
-      const id = uuidv4();
-      allGroups[index].todos.push(id);
-      localStorage.setItem("groups", JSON.stringify(allGroups));
-      allTodos.push({
-        title,
-        description,
-        status: "active",
-        group,
-        id,
-        dueDate,
-        createdBy: isAuthencitaed.id,
-      });
-      localStorage.setItem("todos", JSON.stringify(allTodos));
-      success = true;
-      const todoWithGroup = allTodos.map((todo) => {
-        const group = allGroups.find((group) => group.id === todo.group);
-        return { ...todo, group: group.name };
-      });
-      return { data: todoWithGroup[todoWithGroup.length - 1], success };
+      if (getDueDate() <= dueDate) {
+        const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
+        const allGroups = JSON.parse(localStorage.getItem("groups"));
+        const index = allGroups.findIndex((elem) => elem.id === group);
+        const id = uuidv4();
+        allGroups[index].todos.push(id);
+        localStorage.setItem("groups", JSON.stringify(allGroups));
+        allTodos.push({
+          title,
+          description,
+          status: "active",
+          group,
+          id,
+          dueDate,
+          createdBy: isAuthencitaed.id,
+        });
+        localStorage.setItem("todos", JSON.stringify(allTodos));
+        success = true;
+        const todoWithGroup = allTodos.map((todo) => {
+          const group = allGroups.find((group) => group.id === todo.group);
+          return { ...todo, group: group.name };
+        });
+        return { data: todoWithGroup[todoWithGroup.length - 1], success };
+      } else {
+        throw new UserException(
+          "Invalid Due Date",
+          "Please select correct due date"
+        );
+      }
     } else {
-      throw Error("All Fields Are Required");
+      throw new UserException("Missing fields", "All fields are required");
     }
   } else {
     throw Error("Not authorized");
@@ -59,8 +76,12 @@ export const getTodoById = async (token, todoId) => {
     const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
     const groups = JSON.parse(localStorage.getItem("groups")) || [];
     const singleTodo = allTodos.find((todo) => todo.id === todoId);
-    const group = groups.find((group) => group.id === singleTodo.group);
-    return { ...singleTodo, group: group.id };
+    if (singleTodo) {
+      const group = groups.find((group) => group.id === singleTodo.group);
+      if (singleTodo.status === "active") {
+        return { ...singleTodo, group: group.id };
+      }
+    }
   }
 };
 
@@ -68,29 +89,41 @@ export const editTodo = async (token, todoId, newTodo) => {
   const { title, description, group, dueDate } = newTodo;
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
-    const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
-    const allGroups = JSON.parse(localStorage.getItem("groups")) || [];
-    const index = allTodos.findIndex((todo) => todo.id === todoId);
-    const oldGroupId = allTodos[index].group;
-    const oldGroupIndex = allGroups.findIndex(
-      (group) => group.id === oldGroupId
-    );
-    const todoIndex = allGroups[oldGroupIndex].todos.indexOf(todoId);
-    if (todoIndex > -1) {
-      allGroups[oldGroupIndex].todos.splice(todoIndex, 1);
-    }
-    const newGroupIndex = allGroups.findIndex((groups) => groups.id === group);
-    allGroups[newGroupIndex].todos.push(todoId);
-    if (title && description && group && dueDate) {
-      allTodos[index].title = title;
-      allTodos[index].description = description;
-      allTodos[index].group = group;
-      allTodos[index].dueDate = dueDate;
-      localStorage.setItem("todos", JSON.stringify(allTodos));
-      localStorage.setItem("groups", JSON.stringify(allGroups));
-      return { todo: allTodos[index], success: true };
+    if (getDueDate() <= dueDate) {
+      const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
+      const allGroups = JSON.parse(localStorage.getItem("groups")) || [];
+      const index = allTodos.findIndex((todo) => todo.id === todoId);
+      if(index === -1){
+        throw new UserException("Not found", "Todo not found");
+      }
+      const oldGroupId = allTodos[index].group;
+      const oldGroupIndex = allGroups.findIndex(
+        (group) => group.id === oldGroupId
+      );
+      const todoIndex = allGroups[oldGroupIndex].todos.indexOf(todoId);
+      if (todoIndex > -1) {
+        allGroups[oldGroupIndex].todos.splice(todoIndex, 1);
+      }
+      const newGroupIndex = allGroups.findIndex(
+        (groups) => groups.id === group
+      );
+      allGroups[newGroupIndex].todos.push(todoId);
+      if (title && description && group && dueDate) {
+        allTodos[index].title = title;
+        allTodos[index].description = description;
+        allTodos[index].group = group;
+        allTodos[index].dueDate = dueDate;
+        localStorage.setItem("todos", JSON.stringify(allTodos));
+        localStorage.setItem("groups", JSON.stringify(allGroups));
+        return { todo: allTodos[index], success: true };
+      } else {
+        throw new UserException("Missing fields", "All fields are required");
+      }
     } else {
-      throw Error("All Fields Are Required");
+      throw new UserException(
+        "Invalid Due Date",
+        "Please select correct due date"
+      );
     }
   }
 };
@@ -138,12 +171,17 @@ export const deleleTodo = async (token, todoId) => {
     const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
     const allGroups = JSON.parse(localStorage.getItem("groups")) || [];
     const todoIndex = allTodos.findIndex((todo) => todo.id === todoId);
+    if (todoIndex === -1) {
+      throw new UserException("Not found", "Todo not found");
+    }
     const groupIndex = allGroups.findIndex(
       (group) => group.id === allTodos[todoIndex].group
     );
     const todoToBeDeleted = allGroups[groupIndex].todos.indexOf(todoId);
     if (todoToBeDeleted > -1) {
       allGroups[groupIndex].todos.splice(todoToBeDeleted, 1);
+    } else {
+      throw new UserException("Not found", "Todo not found");
     }
     allTodos.splice(todoIndex, 1);
     const filteredTodos = allTodos.filter(

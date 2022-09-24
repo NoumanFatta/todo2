@@ -28,6 +28,13 @@ const Routes = ({ isLoggedIn }) => {
           createdBy: "871e596e-9b98-43e0-ae4b-b73c98df9f73",
         },
       ];
+      const getDueDate = () => {
+        const today = new Date();
+        const dd = String(today.getDate() + 1).padStart(2, "0");
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const yyyy = today.getFullYear();
+        return yyyy + "-" + mm + "-" + dd;
+      };
       const todos = [
         {
           title: "Title 2",
@@ -36,6 +43,7 @@ const Routes = ({ isLoggedIn }) => {
           group: "81bcdef6-6262-4bd6-96ec-0c9882eafb82",
           id: "d74674fc-8c21-4715-9fb8-b0a87cb42dfd",
           createdBy: "871e596e-9b98-43e0-ae4b-b73c98df9f73",
+          dueDate: getDueDate(),
         },
       ];
       localStorage.setItem("users", JSON.stringify(user));

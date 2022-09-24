@@ -13,21 +13,31 @@ import { Link } from "react-router-dom";
 import { loginUser } from "../controllers/user";
 import { useDispatch } from "react-redux";
 import { loginReducer } from "../store/reducers/auth-slice";
+import { showNotification } from "../store/reducers/ui-slice";
 
 const Signin = () => {
   const dispatch = useDispatch();
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const response = await loginUser({
+    loginUser({
       email: data.get("email"),
       password: data.get("password"),
-    });
-    if (response.success) {
-      dispatch(loginReducer({ token: response.token }));
-    } else {
-      alert(response.msg);
-    }
+    })
+      .then((response) => {
+        if (response.success) {
+          dispatch(loginReducer({ token: response.token }));
+        }
+      })
+      .catch((error) => {
+        dispatch(
+          showNotification({
+            status: "error",
+            title: error.title,
+            message: error.message,
+          })
+        );
+      });
   };
 
   return (
@@ -46,14 +56,14 @@ const Signin = () => {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           <TextField
             margin="normal"
             required
             fullWidth
+            type='email'
             id="email"
             name="email"
-            autoComplete="email"
             autoFocus
             placeholder="test@test.com"
           />

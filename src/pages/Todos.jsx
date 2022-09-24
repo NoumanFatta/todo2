@@ -33,6 +33,7 @@ import {
 import { getAllGroups } from "../controllers/groups";
 import { getGroupsReducer } from "../store/reducers/groups-slice";
 import { useNavigate } from "react-router-dom";
+import { showNotification } from "../store/reducers/ui-slice";
 
 const Todos = (props) => {
   const { status } = props;
@@ -88,21 +89,53 @@ const Todos = (props) => {
         dispatch(createTodoReducer(response.data));
         setOpen(false);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        dispatch(
+          showNotification({
+            status: "error",
+            title: err.title,
+            message: err.message,
+          })
+        );
+      });
   };
 
   const statusHandler = async (todo) => {
     const sendStatus = status === "active" ? "completed" : "active";
     changeStatus(token, todo.id, sendStatus).then((response) => {
       if (response.success) {
+        dispatch(
+          showNotification({
+            status: "success",
+            title: "Success",
+            message: "Status has been changed",
+          })
+        );
         dispatch(getActiveTodosReducer(response.todos));
       }
     });
   };
   const deleteHandler = async (id) => {
-    deleleTodo(token, id).then((response) => {
-      dispatch(getActiveTodosReducer(response.todos));
-    });
+    deleleTodo(token, id)
+      .then((response) => {
+        dispatch(
+          showNotification({
+            status: "success",
+            title: "Success",
+            message: "Todo has been deleted",
+          })
+        );
+        dispatch(getActiveTodosReducer(response.todos));
+      })
+      .catch((err) => {
+        dispatch(
+          showNotification({
+            status: "error",
+            title: err.title,
+            message: err.message,
+          })
+        );
+      });
   };
   const disablePastDate = () => {
     const today = new Date();

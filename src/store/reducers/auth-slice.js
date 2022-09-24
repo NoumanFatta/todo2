@@ -22,6 +22,7 @@ const authSlice = createSlice({
     logoutUser(state) {
       state.isLoggedIn = false;
       state.user = null;
+      state.userData = {}
       cookie.remove("user", { path: "/" });
     },
     setUserData: (state, action) => {

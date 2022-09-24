@@ -37,6 +37,8 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
+import { showNotification } from "../store/reducers/ui-slice";
+
 const Groups = () => {
   const { groups, isLoading } = useSelector((state) => state.group);
   const [open, setOpen] = useState({ create: false, edit: false });
@@ -62,27 +64,66 @@ const Groups = () => {
     const data = new FormData(event.currentTarget);
     createGroup(token, {
       name: data.get("name"),
-    }).then((groups) => dispatch(createGroupReducer(groups)));
-    setOpen({ create: false, edit: false });
+    })
+      .then((groups) => {
+        dispatch(createGroupReducer(groups));
+        setOpen({ create: false, edit: false });
+        dispatch(
+          showNotification({
+            status: "success",
+            title: "Successfull",
+            message: "Group successfully created",
+          })
+        );
+      })
+      .catch((err) => {
+        dispatch(
+          showNotification({
+            status: "error",
+            title: err.title,
+            message: err.message,
+          })
+        );
+      });
   };
 
   const handleEditSubmit = (event) => {
     event.preventDefault();
-    editGroup(token, { ...openedGroup }).then((response) => {
-      if (response.succes) {
-        dispatch(updateGroup(response));
-      }
-    });
-    setOpen({ create: false, edit: false });
+    editGroup(token, { ...openedGroup })
+      .then((response) => {
+        if (response.succes) {
+          dispatch(updateGroup(response));
+          setOpen({ create: false, edit: false });
+        }
+      })
+      .catch((err) => {
+        dispatch(
+          showNotification({
+            status: "error",
+            title: err.title,
+            message: err.message,
+          })
+        );
+      });
   };
 
   const delteHandler = (event, id) => {
     event.stopPropagation();
-    deleteGroup(token, id).then((respone) => {
-      if (respone.success) {
-        dispatch(deleteGroupReducer(respone));
-      }
-    });
+    deleteGroup(token, id)
+      .then((respone) => {
+        if (respone.success) {
+          dispatch(deleteGroupReducer(respone));
+        }
+      })
+      .catch((err) => {
+        dispatch(
+          showNotification({
+            status: "error",
+            title: err.title,
+            message: err.message,
+          })
+        );
+      });
   };
   const editHandler = (event, group) => {
     event.stopPropagation();
@@ -190,7 +231,7 @@ const Groups = () => {
         fullWidth={false}
         open={open.create}
       >
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           <TextField
             margin="normal"
             required

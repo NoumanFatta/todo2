@@ -14,23 +14,33 @@ import { Link } from "react-router-dom";
 import { signupUser } from "../controllers/user";
 import { useDispatch } from "react-redux";
 import { loginReducer } from "../store/reducers/auth-slice";
+import { showNotification } from "../store/reducers/ui-slice";
 
 const Signup = () => {
   const dispatch = useDispatch();
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const response = await signupUser({
+    signupUser({
       email: data.get("email"),
       password: data.get("password"),
       firstName: data.get("firstName"),
       lastName: data.get("lastName"),
-    });
-    if (response.success) {
-      dispatch(loginReducer({ token: response.token }));
-    } else {
-      alert(response.msg);
-    }
+    })
+      .then((response) => {
+        if (response.success) {
+          dispatch(loginReducer({ token: response.token }));
+        }
+      })
+      .catch((err) => {
+        dispatch(
+          showNotification({
+            status: "error",
+            title: err.title,
+            message: err.message,
+          })
+        );
+      });
   };
 
   return (
@@ -50,7 +60,7 @@ const Signup = () => {
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -70,7 +80,6 @@ const Signup = () => {
                 id="lastName"
                 label="Last Name"
                 name="lastName"
-                autoComplete="family-name"
               />
             </Grid>
             <Grid item xs={12}>
@@ -78,6 +87,7 @@ const Signup = () => {
                 required
                 fullWidth
                 id="email"
+                type="email"
                 label="Email Address"
                 name="email"
                 autoComplete="email"

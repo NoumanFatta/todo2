@@ -1,5 +1,5 @@
 import React, { createRef, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { editTodo, getTodoById } from "../controllers/todos";
 import cookie from "react-cookies";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,9 +17,11 @@ import {
 } from "@mui/material";
 import { getGroupsReducer } from "../store/reducers/groups-slice";
 import { getAllGroups } from "../controllers/groups";
+import { showNotification } from "../store/reducers/ui-slice";
 const EditTodo = () => {
   const todoId = useParams();
   const token = cookie.load("user") ? cookie.load("user") : "";
+  const navigate = useNavigate();
   const refs = ["title", "description", "dueDate"];
   const elementsRef = useRef(refs.map(() => createRef()));
   const { singleTodo } = useSelector((state) => state.todo);
@@ -31,7 +33,11 @@ const EditTodo = () => {
       dispatch(getGroupsReducer(groups));
     });
     getTodoById(token, todoId.id).then((response) => {
-      dispatch(getTodoByIdReducer(response));
+      if (response) {
+        dispatch(getTodoByIdReducer(response));
+      } else {
+        navigate(-1);
+      }
     });
     // eslint-disable-next-line
   }, []);
@@ -54,12 +60,28 @@ const EditTodo = () => {
       description: data.get("description"),
       group: data.get("group"),
       dueDate: data.get("due-date"),
-    }).then((response) => {
-      if (response.success) {
-        dispatch(updateTodo(response));
-        alert("todo has been updated");
-      }
-    });
+    })
+      .then((response) => {
+        if (response.success) {
+          dispatch(updateTodo(response));
+          dispatch(
+            showNotification({
+              status: "success",
+              title: 'Successfull',
+              message: 'Todo has been updated',
+            })
+          );
+        }
+      })
+      .catch((err) => {
+        dispatch(
+          showNotification({
+            status: "error",
+            title: err.title,
+            message: err.message,
+          })
+        );
+      });
   };
   const groupHandler = (e) => {
     const { value } = e.target;
