@@ -22,6 +22,10 @@ const todoSlice = createSlice({
     updateTodo(state, action) {
       state.singleTodo = action.payload.todo;
     },
+    deleteTodoReducer(state, action) {
+      const todo = action.payload;
+      state.todos = state.todos.filter((todos) => todos.id !== todo.id);
+    },
     sortTodos(state, action) {
       const { payload } = action;
       const ascending = (a, b) => {
@@ -60,5 +64,6 @@ export const {
   getTodoByIdReducer,
   updateTodo,
   sortTodos,
+  deleteTodoReducer,
   clearTodos,
 } = todoSlice.actions;

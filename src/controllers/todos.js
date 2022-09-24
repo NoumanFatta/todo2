@@ -93,7 +93,7 @@ export const editTodo = async (token, todoId, newTodo) => {
       const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
       const allGroups = JSON.parse(localStorage.getItem("groups")) || [];
       const index = allTodos.findIndex((todo) => todo.id === todoId);
-      if(index === -1){
+      if (index === -1) {
         throw new UserException("Not found", "Todo not found");
       }
       const oldGroupId = allTodos[index].group;
@@ -174,6 +174,7 @@ export const deleleTodo = async (token, todoId) => {
     if (todoIndex === -1) {
       throw new UserException("Not found", "Todo not found");
     }
+    const deletedTodo = allTodos.find((todo) => todo.id === todoId);
     const groupIndex = allGroups.findIndex(
       (group) => group.id === allTodos[todoIndex].group
     );
@@ -184,18 +185,10 @@ export const deleleTodo = async (token, todoId) => {
       throw new UserException("Not found", "Todo not found");
     }
     allTodos.splice(todoIndex, 1);
-    const filteredTodos = allTodos.filter(
-      (todo) => todo.createdBy === isAuthencitaed.id
-    );
-    const todoWithGroup = filteredTodos.map((todo) => {
-      const group = allGroups.find((group) => group.id === todo.group);
-      return { ...todo, group: group.name };
-    });
     localStorage.setItem("todos", JSON.stringify(allTodos));
     localStorage.setItem("groups", JSON.stringify(allGroups));
     return {
-      groups: allGroups,
-      todos: todoWithGroup,
+      todo: deletedTodo,
     };
   }
 };

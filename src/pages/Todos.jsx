@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   clearTodos,
   createTodoReducer,
+  deleteTodoReducer,
   getActiveTodosReducer,
   sortTodos,
 } from "../store/reducers/todos-slice";
@@ -132,7 +133,7 @@ const Todos = (props) => {
             message: "Todo has been deleted",
           })
         );
-        dispatch(getActiveTodosReducer(response.todos));
+        dispatch(deleteTodoReducer(response.todo));
       })
       .catch((err) => {
         dispatch(
