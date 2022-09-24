@@ -21,19 +21,26 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import cookie from "react-cookies";
 import { useDispatch, useSelector } from "react-redux";
-import { createGroup, deleteGroup, getAllGroups } from "../controllers/groups";
+import {
+  createGroup,
+  deleteGroup,
+  editGroup,
+  getAllGroups,
+} from "../controllers/groups";
 import {
   createGroupReducer,
   deleteGroupReducer,
   getGroupsReducer,
+  updateGroup,
 } from "../store/reducers/groups-slice";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from "react-router-dom";
-
+import EditIcon from "@mui/icons-material/Edit";
 const Groups = () => {
   const { groups, isLoading } = useSelector((state) => state.group);
+  const [open, setOpen] = useState({ create: false, edit: false });
+  const [openedGroup, setOpenedGroup] = useState({});
   const token = cookie.load("user") ? cookie.load("user") : "";
-  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   useEffect(() => {
     getAllGroups(token).then((groups) => {
@@ -48,17 +55,38 @@ const Groups = () => {
     createGroup(token, {
       name: data.get("name"),
     }).then((groups) => dispatch(createGroupReducer(groups)));
-    setOpen(false);
+    setOpen({ create: false, edit: false });
   };
+
+  const handleEditSubmit = (event) => {
+    event.preventDefault();
+    editGroup(token, { ...openedGroup }).then((response) => {
+      if (response.succes) {
+        dispatch(updateGroup(response));
+      }
+    });
+    setOpen({ create: false, edit: false });
+  };
+
   const delteHandler = (event, id) => {
     event.stopPropagation();
-    deleteGroup(token, id)
-    .then((respone) => {
+    deleteGroup(token, id).then((respone) => {
       if (respone.success) {
         dispatch(deleteGroupReducer(respone));
       }
     });
   };
+  const editHandler = (event, group) => {
+    event.stopPropagation();
+    setOpenedGroup({ name: group.name, groupId: group.id });
+    setOpen({ create: false, edit: true });
+  };
+
+  const closeHandler = () => {
+    setOpen({ create: false, edit: false });
+    setOpenedGroup({});
+  };
+
   return (
     <Card sx={{ padding: 5 }}>
       <Grid
@@ -81,7 +109,10 @@ const Groups = () => {
           <Typography variant="h4">Groups</Typography>
         </Grid>
         <Grid item>
-          <Button onClick={() => setOpen(true)} variant="contained">
+          <Button
+            onClick={() => setOpen({ create: true, edit: false })}
+            variant="contained"
+          >
             Create group
           </Button>
         </Grid>
@@ -104,6 +135,12 @@ const Groups = () => {
                     onClick={(e) => delteHandler(e, group.id)}
                   >
                     <DeleteIcon />
+                  </IconButton>
+                  <IconButton
+                    className="edit-icon groups"
+                    onClick={(e) => editHandler(e, group)}
+                  >
+                    <EditIcon />
                   </IconButton>
                   <Typography>{group.name}</Typography>
                 </AccordionSummary>
@@ -140,7 +177,11 @@ const Groups = () => {
           </Grid>
         )}
       </Grid>
-      <Popup handleClose={() => setOpen(false)} fullWidth={false} open={open}>
+      <Popup
+        handleClose={() => setOpen({ create: false, edit: false })}
+        fullWidth={false}
+        open={open.create}
+      >
         <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
           <TextField
             margin="normal"
@@ -157,6 +198,34 @@ const Groups = () => {
             sx={{ mt: 3, mb: 2 }}
           >
             Create group
+          </Button>
+        </Box>
+      </Popup>
+      <Popup handleClose={closeHandler} fullWidth={false} open={open.edit}>
+        <Box
+          component="form"
+          onSubmit={handleEditSubmit}
+          noValidate
+          sx={{ mt: 1 }}
+        >
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Name"
+            autoFocus
+            onChange={(e) =>
+              setOpenedGroup((prev) => ({ ...prev, name: e.target.value }))
+            }
+            value={openedGroup?.name ? openedGroup.name : ""}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            Edit group
           </Button>
         </Box>
       </Popup>

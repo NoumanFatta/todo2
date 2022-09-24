@@ -71,7 +71,21 @@ export const deleteGroup = async (token, groupId) => {
       localStorage.setItem("todos", JSON.stringify(allTodos));
       return { group, success: true };
     } else {
-      throw Error("Element not found");
+      throw Error("Group not found");
+    }
+  } else {
+    throw Error("Not authorized");
+  }
+};
+export const editGroup = async (token, { name, groupId }) => {
+  const isAuthencitaed = await checkToken(token);
+  if (isAuthencitaed) {
+    const allGroups = JSON.parse(localStorage.getItem("groups")) || [];
+    const groupIndex = allGroups.findIndex((group) => group.id === groupId);
+    if (name) {
+      allGroups[groupIndex].name = name;
+      localStorage.setItem("groups", JSON.stringify(allGroups));
+      return { group: allGroups[groupIndex], succes: true };
     }
   } else {
     throw Error("Not authorized");

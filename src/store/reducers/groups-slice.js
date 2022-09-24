@@ -21,8 +21,19 @@ const groupsSlice = createSlice({
         (group) => group.id != responeGroup.id
       );
     },
+    updateGroup(state, action) {
+      const responeGroup = action.payload.group;
+      const groupIndex = state.groups.findIndex(
+        (group) => group.id === responeGroup.id
+      );
+      state.groups[groupIndex] = responeGroup;
+    },
   },
 });
 export default groupsSlice.reducer;
-export const { getGroupsReducer, createGroupReducer, deleteGroupReducer } =
-  groupsSlice.actions;
+export const {
+  getGroupsReducer,
+  createGroupReducer,
+  deleteGroupReducer,
+  updateGroup,
+} = groupsSlice.actions;
