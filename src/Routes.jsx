@@ -7,6 +7,7 @@ import Groups from "./pages/Groups";
 import Todos from "./pages/Todos";
 import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
+import NotFound from "./components/NotFound";
 const Routes = ({ isLoggedIn }) => {
   useEffect(() => {
     const allUsers = JSON.parse(localStorage.getItem("users"));
@@ -80,6 +81,10 @@ const Routes = ({ isLoggedIn }) => {
         {
           path: "groups",
           element: <Groups />,
+        },
+        {
+          path: "*",
+          element: <NotFound />,
         },
       ],
     },
