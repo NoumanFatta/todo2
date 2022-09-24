@@ -48,6 +48,9 @@ const todoSlice = createSlice({
         state.todos.sort(descending);
       }
     },
+    clearTodos(state) {
+      state.todos = [];
+    },
   },
 });
 export default todoSlice.reducer;
@@ -57,4 +60,5 @@ export const {
   getTodoByIdReducer,
   updateTodo,
   sortTodos,
+  clearTodos,
 } = todoSlice.actions;

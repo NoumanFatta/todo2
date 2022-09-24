@@ -25,6 +25,7 @@ import {
 import cookie from "react-cookies";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  clearTodos,
   createTodoReducer,
   getActiveTodosReducer,
   sortTodos,
@@ -42,6 +43,13 @@ const Todos = (props) => {
   const { groups } = useSelector((state) => state.group);
   const savedOrder = localStorage.getItem("order");
   const [order, setOrder] = useState(savedOrder);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearTodos())
+    };
+  }, [status]);
+
   useEffect(() => {
     dispatch(sortTodos(order));
   }, [order, todos]);
@@ -223,10 +231,10 @@ const Todos = (props) => {
                     sx={{
                       flexDirection: {
                         xs: "column",
-                        sm:'column',
-                        md:'row'
+                        sm: "column",
+                        md: "row",
                       },
-                      rowGap:2
+                      rowGap: 2,
                     }}
                     paddingTop={1}
                   >

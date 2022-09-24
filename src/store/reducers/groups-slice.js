@@ -28,6 +28,9 @@ const groupsSlice = createSlice({
       );
       state.groups[groupIndex] = responeGroup;
     },
+    clearGroups(state) {
+      state.groups = [];
+    },
   },
 });
 export default groupsSlice.reducer;
@@ -36,4 +39,5 @@ export const {
   createGroupReducer,
   deleteGroupReducer,
   updateGroup,
+  clearGroups,
 } = groupsSlice.actions;

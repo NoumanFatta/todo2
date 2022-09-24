@@ -28,6 +28,7 @@ import {
   getAllGroups,
 } from "../controllers/groups";
 import {
+  clearGroups,
   createGroupReducer,
   deleteGroupReducer,
   getGroupsReducer,
@@ -49,6 +50,12 @@ const Groups = () => {
     // eslint-disable-next-line
   }, []);
 
+  useEffect(() => {
+    return () => {
+      dispatch(clearGroups());
+    };
+  }, []);
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -60,8 +67,7 @@ const Groups = () => {
 
   const handleEditSubmit = (event) => {
     event.preventDefault();
-    editGroup(token, { ...openedGroup })
-    .then((response) => {
+    editGroup(token, { ...openedGroup }).then((response) => {
       if (response.succes) {
         dispatch(updateGroup(response));
       }
