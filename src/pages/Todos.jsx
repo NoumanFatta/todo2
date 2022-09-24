@@ -126,6 +126,7 @@ const Todos = (props) => {
   const deleteHandler = async (id) => {
     deleleTodo(token, id)
       .then((response) => {
+        dispatch(deleteTodoReducer(response.todo));
         dispatch(
           showNotification({
             status: "success",
@@ -133,7 +134,6 @@ const Todos = (props) => {
             message: "Todo has been deleted",
           })
         );
-        dispatch(deleteTodoReducer(response.todo));
       })
       .catch((err) => {
         dispatch(
