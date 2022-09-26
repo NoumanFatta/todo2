@@ -34,6 +34,13 @@ export const createGroup = async (token, newGroup) => {
     if (name) {
       const allGroups = JSON.parse(localStorage.getItem("groups")) || [];
       const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
+      const groupFound = allGroups.find((group) => group.name === name);
+      if (groupFound) {
+        throw new UserException(
+          "Already exists",
+          "Group with this name already exists"
+        );
+      }
       const id = uuidv4();
       allGroups.push({ name, todos: [], id, createdBy: isAuthencitaed.id });
       localStorage.setItem("groups", JSON.stringify(allGroups));
@@ -91,6 +98,13 @@ export const editGroup = async (token, { name, groupId }) => {
     }
     const groupById = allGroups.find((group) => group.id === groupId);
     if (name) {
+      const groupFound = allGroups.find((group) => group.name === name);
+      if (groupFound) {
+        throw new UserException(
+          "Already exists",
+          "Group with this name already exists"
+        );
+      }
       allGroups[groupIndex].name = name;
       const groupWithTodos = { ...groupById };
       groupWithTodos.todos = [];
@@ -100,6 +114,11 @@ export const editGroup = async (token, { name, groupId }) => {
       });
       localStorage.setItem("groups", JSON.stringify(allGroups));
       return { group: groupWithTodos, succes: true };
+    } else {
+      throw new UserException(
+        "Missing fields",
+        "All fields are required"
+      );
     }
   } else {
     throw Error("Not authorized");
