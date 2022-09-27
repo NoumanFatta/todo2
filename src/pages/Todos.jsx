@@ -213,15 +213,6 @@ const Todos = (props) => {
         alignItems="center"
         marginBottom={2}
         justifyContent="space-between"
-        // sx={{
-        //   justifyContent: {
-        //     md: "space-between",
-        //   },
-        //   flexDirection: {
-        //     md: "row",
-        //     sm: "row",
-        //   },
-        // }}
       >
         <Grid
           sx={{
