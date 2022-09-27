@@ -27,7 +27,10 @@ const EditTodo = () => {
   const { singleTodo } = useSelector((state) => state.todo);
   const { groups } = useSelector((state) => state.group);
   const dispatch = useDispatch();
-  const [groupValue, setGroupValue] = useState("");
+  const [values, setValues] = useState({
+    group: "",
+    priority: "",
+  });
   useEffect(() => {
     getAllGroups(token).then((groups) => {
       dispatch(getGroupsReducer(groups));
@@ -46,7 +49,11 @@ const EditTodo = () => {
       elementsRef.current.map((ref, ind) => {
         return (ref.current.value = singleTodo[refs[ind]]);
       });
-      setGroupValue(singleTodo.group);
+      setValues((pre) => ({
+        ...pre,
+        group: singleTodo.group,
+        priority: singleTodo.priority,
+      }));
     }
     // eslint-disable-next-line
   }, [singleTodo]);
@@ -60,6 +67,7 @@ const EditTodo = () => {
       description: data.get("description"),
       group: data.get("group"),
       dueDate: data.get("due-date"),
+      priority: data.get("priority"),
     })
       .then((response) => {
         if (response.success) {
@@ -83,9 +91,9 @@ const EditTodo = () => {
         );
       });
   };
-  const groupHandler = (e) => {
+  const valuesHandler = (e, key) => {
     const { value } = e.target;
-    setGroupValue(value);
+    setValues((pre) => ({ ...pre, [key]: value }));
   };
   const disablePastDate = () => {
     const today = new Date();
@@ -136,13 +144,26 @@ const EditTodo = () => {
               }
             }}
           />
+          <FormControl sx={{ marginBottom: 2 }} fullWidth>
+            <InputLabel>Select Priority</InputLabel>
+            <Select
+              onChange={(e) => valuesHandler(e, "priority")}
+              required
+              name="priority"
+              value={values.priority}
+              label="Select Priority"
+            >
+              <MenuItem value={1}>High</MenuItem>
+              <MenuItem value={0}>Low</MenuItem>
+            </Select>
+          </FormControl>
           <FormControl fullWidth>
             <InputLabel>Select Group</InputLabel>
             <Select
               name="group"
-              value={groupValue}
+              value={values.group}
               label="Select group"
-              onChange={groupHandler}
+              onChange={(e) => valuesHandler(e, "group")}
             >
               {groups.map((group) => (
                 <MenuItem key={group.id} value={group.id}>

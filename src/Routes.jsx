@@ -44,6 +44,7 @@ const Routes = ({ isLoggedIn }) => {
           group: "81bcdef6-6262-4bd6-96ec-0c9882eafb82",
           id: "d74674fc-8c21-4715-9fb8-b0a87cb42dfd",
           createdBy: "871e596e-9b98-43e0-ae4b-b73c98df9f73",
+          priority: "1",
           dueDate: getDueDate(),
         },
       ];

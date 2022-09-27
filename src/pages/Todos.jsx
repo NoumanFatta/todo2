@@ -29,7 +29,6 @@ import {
   createTodoReducer,
   deleteTodoReducer,
   getActiveTodosReducer,
-  sortTodos,
 } from "../store/reducers/todos-slice";
 import { getAllGroups } from "../controllers/groups";
 import { getGroupsReducer } from "../store/reducers/groups-slice";
@@ -44,7 +43,8 @@ const Todos = (props) => {
   const { todos, isLoading } = useSelector((state) => state.todo);
   const { groups } = useSelector((state) => state.group);
   const savedOrder = localStorage.getItem("order");
-  const [order, setOrder] = useState(savedOrder);
+  const [order, setOrder] = useState({ dueDate: savedOrder, priority: "1" });
+  const [filteredTodos, setFilteredTodos] = useState([]);
 
   useEffect(() => {
     return () => {
@@ -53,10 +53,51 @@ const Todos = (props) => {
     // eslint-disable-next-line
   }, [status]);
 
+  const sortTodos = (action, data) => {
+    const { dueDate, priority } = action;
+    const newTodos = [...data];
+    if (dueDate === "ascending") {
+      newTodos.sort((a, b) => {
+        if (a.dueDate === b.dueDate) {
+          if (priority === "1") {
+            return a.priority > b.priority ? -1 : 1;
+          } else {
+            return a.priority < b.priority ? -1 : 1;
+          }
+        } else {
+          return a.dueDate > b.dueDate ? -1 : 1;
+        }
+      });
+      setFilteredTodos(newTodos);
+    } else {
+      // newTodos.sort(descending);
+      newTodos.sort((a, b) => {
+        if (a.dueDate === b.dueDate) {
+          if (priority === "1") {
+            return a.priority > b.priority ? -1 : 1;
+          } else {
+            return a.priority < b.priority ? -1 : 1;
+          }
+        } else {
+          return a.dueDate < b.dueDate ? -1 : 1;
+        }
+      });
+      setFilteredTodos(newTodos);
+    }
+  };
+
   useEffect(() => {
-    if (todos.length) dispatch(sortTodos(order));
+    setFilteredTodos(todos);
+    sortTodos(order, todos);
     // eslint-disable-next-line
-  }, [order, todos]);
+  }, [todos]);
+
+  useEffect(() => {
+    if (filteredTodos.length) {
+      sortTodos(order, filteredTodos);
+    }
+    // eslint-disable-next-line
+  }, [order]);
 
   useEffect(() => {
     getActiveTodos(token, status).then((todos) => {
@@ -72,7 +113,6 @@ const Todos = (props) => {
   const editTodo = (currentTodo) => {
     navigate(`${currentTodo.id}`);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
@@ -85,6 +125,7 @@ const Todos = (props) => {
       description: data.get("description"),
       group: data.get("group"),
       dueDate: data.get("due-date"),
+      priority: data.get("priority"),
     })
       .then((response) => {
         dispatch(createTodoReducer(response.data));
@@ -152,55 +193,54 @@ const Todos = (props) => {
     const yyyy = today.getFullYear();
     return yyyy + "-" + mm + "-" + dd;
   };
-
+  const filterHandler = (event, key) => {
+    const { value } = event.target;
+    if (key === "group") {
+      if (value === "all") {
+        setFilteredTodos(todos);
+        sortTodos(order, todos);
+      } else {
+        const newTodos = todos.filter((todo) => todo.group === value);
+        setFilteredTodos(newTodos);
+        sortTodos(order, newTodos);
+      }
+    }
+  };
   return (
     <Card sx={{ padding: 5 }}>
       <Grid
         container
         alignItems="center"
         marginBottom={2}
-        sx={{
-          justifyContent: {
-            md: "space-between",
-          },
-          flexDirection: {
-            md: "row",
-            sm: "row",
-          },
-        }}
+        justifyContent="space-between"
+        // sx={{
+        //   justifyContent: {
+        //     md: "space-between",
+        //   },
+        //   flexDirection: {
+        //     md: "row",
+        //     sm: "row",
+        //   },
+        // }}
       >
-        <Grid item xs={12} md={3}>
+        <Grid
+          sx={{
+            textAlign: {
+              xs: "center",
+              sm: "start",
+            },
+          }}
+          item
+          xs={12}
+          sm={6}
+          md={6}
+        >
           <Typography textTransform="capitalize" variant="h4">
             {status} Todos
           </Typography>
         </Grid>
-
-        <Grid item xs={12} md={5}>
-          <Grid container alignItems="center">
-            <Grid item xs={12} sm={6} md={6}>
-              <Typography textTransform="capitalize" variant="h6">
-                Sort By Due Date:
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>Select Order</InputLabel>
-                <Select
-                  onChange={(e) => {
-                    localStorage.setItem("order", e.target.value);
-                    setOrder(e.target.value);
-                  }}
-                  value={order}
-                >
-                  <MenuItem value="ascending">Ascending</MenuItem>
-                  <MenuItem value="descending">Descending</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </Grid>
         {status === "active" && (
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} sm={4} md={4}>
             <Box
               display="flex"
               sx={{
@@ -208,8 +248,8 @@ const Todos = (props) => {
                   xs: 1,
                 },
                 justifyContent: {
-                  md: "flex-end",
                   xs: "center",
+                  sm: "flex-end",
                 },
               }}
             >
@@ -224,13 +264,84 @@ const Todos = (props) => {
           </Grid>
         )}
       </Grid>
+      <Grid container spacing={2} marginBottom={2}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Grid container alignItems="center">
+            <Grid item xs={6}>
+              <Typography textTransform="capitalize" variant="h6">
+                Sort By Due Date:
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <Select
+                  onChange={(e) => {
+                    localStorage.setItem("order", e.target.value);
+                    setOrder((pre) => ({ ...pre, dueDate: e.target.value }));
+                  }}
+                  value={order.dueDate}
+                >
+                  <MenuItem value="ascending">Ascending</MenuItem>
+                  <MenuItem value="descending">Descending</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Grid container alignItems="center">
+            <Grid item xs={6}>
+              <Typography textTransform="capitalize" variant="h6">
+                Sort By Priority:
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <Select
+                  defaultValue="1"
+                  onChange={(e) => {
+                    setOrder((pre) => ({ ...pre, priority: e.target.value }));
+                  }}
+                >
+                  <MenuItem value="1">High</MenuItem>
+                  <MenuItem value="0">Low</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Grid container alignItems="center">
+            <Grid item xs={6}>
+              <Typography textTransform="capitalize" variant="h6">
+                Groups:
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <Select
+                  onChange={(e) => filterHandler(e, "group")}
+                  defaultValue="all"
+                >
+                  <MenuItem value="all">All</MenuItem>
+                  {groups.map((group) => (
+                    <MenuItem key={group.id} value={group.name}>
+                      {group.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
       <Grid className="active-todo-list" container spacing={2} rowGap={5}>
         {isLoading ? (
           <Grid item xs={12}>
             <Typography variant="h5">Loading..</Typography>
           </Grid>
-        ) : todos.length !== 0 ? (
-          todos.map((todo) => (
+        ) : filteredTodos.length !== 0 ? (
+          filteredTodos.map((todo) => (
             <Grid key={todo.id} item xs={12} sm={6} md={6} lg={4}>
               <Card
                 sx={{
@@ -255,6 +366,9 @@ const Todos = (props) => {
                 </Typography>
                 <Typography marginBottom={1}>
                   <b>Group: </b> {todo.group}
+                </Typography>
+                <Typography marginBottom={1}>
+                  <b>Priority: </b> {todo.priority === "1" ? "High" : "Low"}
                 </Typography>
                 <Typography>
                   <b>Due Date: </b> {todo.dueDate}
@@ -340,6 +454,18 @@ const Todos = (props) => {
                 }
               }}
             />
+            <FormControl fullWidth>
+              <InputLabel>Select Priority</InputLabel>
+              <Select
+                required
+                name="priority"
+                defaultValue=""
+                label="Select Priority"
+              >
+                <MenuItem value={1}>High</MenuItem>
+                <MenuItem value={0}>Low</MenuItem>
+              </Select>
+            </FormControl>
             <FormControl fullWidth>
               <InputLabel>Select Group</InputLabel>
               <Select

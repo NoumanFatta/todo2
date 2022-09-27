@@ -26,32 +26,6 @@ const todoSlice = createSlice({
       const todo = action.payload;
       state.todos = state.todos.filter((todos) => todos.id !== todo.id);
     },
-    sortTodos(state, action) {
-      const { payload } = action;
-      const ascending = (a, b) => {
-        if (a.dueDate > b.dueDate) {
-          return -1;
-        }
-        if (a.dueDate < b.dueDate) {
-          return 1;
-        }
-        return 0;
-      };
-      const descending = (a, b) => {
-        if (a.dueDate < b.dueDate) {
-          return -1;
-        }
-        if (a.dueDate > b.dueDate) {
-          return 1;
-        }
-        return 0;
-      };
-      if (payload === "ascending") {
-        state.todos.sort(ascending);
-      } else {
-        state.todos.sort(descending);
-      }
-    },
     clearTodos(state) {
       state.todos = [];
     },
@@ -63,7 +37,6 @@ export const {
   createTodoReducer,
   getTodoByIdReducer,
   updateTodo,
-  sortTodos,
   deleteTodoReducer,
   clearTodos,
 } = todoSlice.actions;

@@ -28,11 +28,11 @@ export const getActiveTodos = async (token, status) => {
 };
 
 export const createTodo = async (token, newTodo) => {
-  const { title, description, group, dueDate } = newTodo;
+  const { title, description, group, dueDate, priority } = newTodo;
   let success = false;
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
-    if (title && description && group && dueDate) {
+    if ((title && description && group && dueDate, priority)) {
       if (getDueDate() <= dueDate) {
         const allTodos = JSON.parse(localStorage.getItem("todos")) || [];
         const allGroups = JSON.parse(localStorage.getItem("groups"));
@@ -47,6 +47,7 @@ export const createTodo = async (token, newTodo) => {
           group,
           id,
           dueDate,
+          priority,
           createdBy: isAuthencitaed.id,
         });
         localStorage.setItem("todos", JSON.stringify(allTodos));
@@ -86,7 +87,7 @@ export const getTodoById = async (token, todoId) => {
 };
 
 export const editTodo = async (token, todoId, newTodo) => {
-  const { title, description, group, dueDate } = newTodo;
+  const { title, description, group, dueDate, priority } = newTodo;
   const isAuthencitaed = await checkToken(token);
   if (isAuthencitaed) {
     if (getDueDate() <= dueDate) {
@@ -108,11 +109,12 @@ export const editTodo = async (token, todoId, newTodo) => {
         (groups) => groups.id === group
       );
       allGroups[newGroupIndex].todos.push(todoId);
-      if (title && description && group && dueDate) {
+      if ((title && description && group && dueDate, priority)) {
         allTodos[index].title = title;
         allTodos[index].description = description;
         allTodos[index].group = group;
         allTodos[index].dueDate = dueDate;
+        allTodos[index].priority = priority;
         localStorage.setItem("todos", JSON.stringify(allTodos));
         localStorage.setItem("groups", JSON.stringify(allGroups));
         return { todo: allTodos[index], success: true };
