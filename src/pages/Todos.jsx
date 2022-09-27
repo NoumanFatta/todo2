@@ -339,9 +339,6 @@ const Todos = (props) => {
                 <Select
                   defaultValue="all"
                   onChange={(e) => filterHandler(e, "priority")}
-                  // onChange={(e) => {
-                  //   setOrder((pre) => ({ ...pre, priority: e.target.value }));
-                  // }}
                 >
                   <MenuItem value="all">All</MenuItem>
                   <MenuItem value="1">High</MenuItem>
