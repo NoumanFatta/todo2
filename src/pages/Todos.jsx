@@ -45,6 +45,10 @@ const Todos = (props) => {
   const savedOrder = localStorage.getItem("order");
   const [order, setOrder] = useState({ dueDate: savedOrder, priority: "1" });
   const [filteredTodos, setFilteredTodos] = useState([]);
+  const [filterValues, setFilterValues] = useState({
+    priority: "all",
+    group: "all",
+  });
 
   useEffect(() => {
     return () => {
@@ -195,14 +199,58 @@ const Todos = (props) => {
   };
   const filterHandler = (event, key) => {
     const { value } = event.target;
+    setFilterValues((pre) => ({ ...pre, [key]: value }));
     if (key === "group") {
       if (value === "all") {
-        setFilteredTodos(todos);
-        sortTodos(order, todos);
+        if (filterValues.priority === "all") {
+          setFilteredTodos(todos);
+          sortTodos(order, todos);
+        } else {
+          const newTodos = todos.filter(
+            (todo) => todo.priority === filterValues.priority
+          );
+          setFilteredTodos(newTodos);
+          sortTodos(order, newTodos);
+        }
       } else {
-        const newTodos = todos.filter((todo) => todo.group === value);
-        setFilteredTodos(newTodos);
-        sortTodos(order, newTodos);
+        if (filterValues.priority === "all") {
+          const newTodos = todos.filter((todo) => todo.group === value);
+          setFilteredTodos(newTodos);
+          sortTodos(order, newTodos);
+        } else {
+          const prioritized = todos.filter(
+            (todo) => todo.priority === filterValues.priority
+          );
+          const newTodos = prioritized.filter((todo) => todo.group === value);
+          setFilteredTodos(newTodos);
+          sortTodos(order, newTodos);
+        }
+      }
+    } else {
+      if (value === "all") {
+        if (filterValues.group === "all") {
+          setFilteredTodos(todos);
+          sortTodos(order, todos);
+        } else {
+          const newTodos = todos.filter(
+            (todo) => todo.group === filterValues.group
+          );
+          setFilteredTodos(newTodos);
+          sortTodos(order, newTodos);
+        }
+      } else {
+        if (filterValues.group === "all") {
+          const newTodos = todos.filter((todo) => todo.priority === value);
+          setFilteredTodos(newTodos);
+          sortTodos(order, newTodos);
+        } else {
+          const grouped = todos.filter(
+            (todo) => todo.group === filterValues.group
+          );
+          const newTodos = grouped.filter((todo) => todo.priority === value);
+          setFilteredTodos(newTodos);
+          sortTodos(order, newTodos);
+        }
       }
     }
   };
@@ -283,17 +331,19 @@ const Todos = (props) => {
           <Grid container alignItems="center">
             <Grid item xs={6}>
               <Typography textTransform="capitalize" variant="h6">
-                Sort By Priority:
+                Priority:
               </Typography>
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth>
                 <Select
-                  defaultValue="1"
-                  onChange={(e) => {
-                    setOrder((pre) => ({ ...pre, priority: e.target.value }));
-                  }}
+                  defaultValue="all"
+                  onChange={(e) => filterHandler(e, "priority")}
+                  // onChange={(e) => {
+                  //   setOrder((pre) => ({ ...pre, priority: e.target.value }));
+                  // }}
                 >
+                  <MenuItem value="all">All</MenuItem>
                   <MenuItem value="1">High</MenuItem>
                   <MenuItem value="0">Low</MenuItem>
                 </Select>
